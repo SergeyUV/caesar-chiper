@@ -1,6 +1,10 @@
 {
     "name": "caesar-chiper",
     "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
     "description": "RS School NodeJS course. Task 1. Caesar cipher CLI tool",
     "main": "src/my-caesar-chiper-cli.js",
     "license": "ISC",
@@ -8,7 +12,6 @@
         "my_caesar_cli": "node src/my-caesar-chiper-cli.js"
     },
     "dependencies": {
-
+        "minimist": ">=1.2.3"
     }
-
 }
