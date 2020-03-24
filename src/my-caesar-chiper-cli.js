@@ -3,6 +3,7 @@ const parseArgs = require('minimist');
 
 
 const caesarChiper = {
+    
     optAliases: {
         s: 'shift',
         a: 'action',
@@ -65,7 +66,7 @@ const caesarChiper = {
     return true;
     },
 
-    doAction: function(){
+    actionDo: function(){
         console.log("Out file: " + this.outFilename + " " + typeof this.outFilename + " to stdout " + this.outToStdOut );
         console.log("In file: " + this.inFilename + " " + typeof this.inFilename + " to stdout " + this.inFromStdIn );
         return this[this.action]();
@@ -91,4 +92,4 @@ if( ! caesarChiper.init(process.argv) ){
     process.exit(1);
 }
 
-caesarChiper.doAction();
+caesarChiper.actionDo();
