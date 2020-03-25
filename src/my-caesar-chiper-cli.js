@@ -1,6 +1,7 @@
 
 const parseArgs = require('minimist');
-
+const fs = require('fs');
+const process = require('process');
 
 const caesarChiper = {
     
@@ -51,7 +52,7 @@ const caesarChiper = {
         // input file arg check
         if(typeof this.argv.i == 'undefined'){
             this.inFromStdIn = true;
-        }else if (typeof this.argv.o == 'string'){
+        }else if (typeof this.argv.i == 'string'){
             this.inFromStdIn = false;
             this.inFilename = this.argv.i; 
         }
@@ -66,19 +67,85 @@ const caesarChiper = {
     return true;
     },
 
+    openReadStream: function(){
+        let readStream;
+        
+        if(this.inFromStdIn){
+            readStream = process.stdin;
+        }else{
+            let stat;
+            try{
+                stat = fs.statSync(this.inFilename);
+            }
+            catch(err){
+                console.log(err.toString());
+                return undefined;
+            }
+            
+            if(! stat.isFile()){
+                console.log('Error: ' + this.inFilename + ' is not a file');
+                return undefined;
+            }
+            readStream = fs.createReadStream(this.inFilename);        
+        }
+    return readStream;
+    },
+
+    openWriteStream: function(){
+        let writeStream;
+        
+        if(this.outToStdOut){
+            writeStream = process.stdout;
+        }else{
+            let stat;
+            try{
+                stat = fs.statSync(this.outFilename);
+            }
+            catch(err){
+                
+            }
+            
+            if( stat != undefined && stat.isDirectory()){
+                console.log('Error: ' + this.outFilename + ' is not a file');
+                return undefined;
+            }
+            writeStream = fs.createWriteStream(this.outFilename);        
+        }
+    return writeStream;
+    },
+
     actionDo: function(){
         console.log("Out file: " + this.outFilename + " " + typeof this.outFilename + " to stdout " + this.outToStdOut );
-        console.log("In file: " + this.inFilename + " " + typeof this.inFilename + " to stdout " + this.inFromStdIn );
+        console.log("In file: " + this.inFilename + " " + typeof this.inFilename + " from stdin " + this.inFromStdIn );
+        
+        let readStream = this.openReadStream();
+        if(readStream == undefined){
+            return false;
+        }
+        
+        let writeStream = this.openWriteStream();
+        if(writeStream == undefined){
+            return false;
+        }
+        
+        //console.log(readStream + ' -- ' + typeof readStream);
+        //console.log(writeStream + ' -- ' + typeof writeStream);
+        
+        readStream.pipe(writeStream);
+        
         return this[this.action]();
     },
     
     encodeAction: function(){
         console.log('Do encode' + ' shift ' + this.shift);
         
+        return true;
     },
     
     decodeAction: function(){
         console.log('Do decode' + ' shift ' + this.shift);
+
+        return true;
     },
     
     printUsageToConsole: function() {
@@ -87,9 +154,14 @@ const caesarChiper = {
     }
 }
 
+//console.log(process.argv);
+
 if( ! caesarChiper.init(process.argv) ){
     caesarChiper.printUsageToConsole();
     process.exit(1);
 }
 
-caesarChiper.actionDo();
+if(! caesarChiper.actionDo()){
+    caesarChiper.printUsageToConsole();
+    process.exit(2);
+}
