@@ -115,8 +115,8 @@ const caesarChiper = {
     },
 
     actionDo: function(){
-        console.log("Out file: " + this.outFilename + " " + typeof this.outFilename + " to stdout " + this.outToStdOut );
-        console.log("In file: " + this.inFilename + " " + typeof this.inFilename + " from stdin " + this.inFromStdIn );
+        //console.log("Out file: " + this.outFilename + " " + typeof this.outFilename + " to stdout " + this.outToStdOut );
+        //console.log("In file: " + this.inFilename + " " + typeof this.inFilename + " from stdin " + this.inFromStdIn );
         
         let readStream = this.openReadStream();
         if(readStream == undefined){

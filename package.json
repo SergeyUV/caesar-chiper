@@ -12,6 +12,7 @@
         "my_caesar_cli": "node src/my-caesar-chiper-cli.js"
     },
     "dependencies": {
-        "minimist": ">=1.2.3"
+        "minimist": ">=1.2.3",
+        "through2": ">=2.0.0 <3.0.0"
     }
 }
