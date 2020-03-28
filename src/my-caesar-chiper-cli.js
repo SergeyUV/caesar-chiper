@@ -2,6 +2,8 @@
 const parseArgs = require('minimist');
 const fs = require('fs');
 const process = require('process');
+const { pipeline } = require('stream');
+const through2 = require('through2');
 
 const caesarChiper = {
     
@@ -17,11 +19,13 @@ const caesarChiper = {
         this.argv = parseArgs(argv.slice(2),{alias: this.optAliases});
         
         if( typeof this.argv.s != 'number' || typeof this.argv.a != 'string'){
+            this.error = "Argument error";
             return false;
         }
         
         //shift
         if( this.argv.s <= 0 ){
+            this.error = "Argument error";
             return false;
         } else{
             this.shift = this.argv.s;
@@ -29,6 +33,7 @@ const caesarChiper = {
         
         //action
         if( !(this.argv.a + 'Action' in this) ){
+            this.error = "Argument error";
             return false;
         }else{
          this.action = this.argv.a + 'Action';   
@@ -46,6 +51,7 @@ const caesarChiper = {
             this.outFilename = this.argv.o.toString(); 
         }
         else{
+            this.error = "Argument error";
             return false;
         }
         
@@ -61,9 +67,10 @@ const caesarChiper = {
             this.inFilename = this.argv.i.toString(); 
         }
         else{
+            this.error = "Argument error";
             return false;
         }
-
+        this.error = null;
     return true;
     },
 
@@ -115,8 +122,6 @@ const caesarChiper = {
     },
 
     actionDo: function(){
-        //console.log("Out file: " + this.outFilename + " " + typeof this.outFilename + " to stdout " + this.outToStdOut );
-        //console.log("In file: " + this.inFilename + " " + typeof this.inFilename + " from stdin " + this.inFromStdIn );
         
         let readStream = this.openReadStream();
         if(readStream == undefined){
@@ -128,24 +133,44 @@ const caesarChiper = {
             return false;
         }
         
-        //console.log(readStream + ' -- ' + typeof readStream);
-        //console.log(writeStream + ' -- ' + typeof writeStream);
-        
-        readStream.pipe(writeStream);
-        
-        return this[this.action]();
+        let ret = true;
+        this.error = null;
+
+        pipeline(
+            readStream,
+            through2(this[this.action]),
+            writeStream,
+            (err)=>{
+                if(err){
+                    this.error = err;
+                    ret = false;
+                    console.log("Data transfer error");
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+        )
+        console.log(ret);
+        return ret;//this[this.action]();
     },
     
-    encodeAction: function(){
+    encodeAction: function(chunk, enc, callback){
+        
         console.log('Do encode' + ' shift ' + this.shift);
         
-        return true;
+        this.push(chunk);
+        callback();
+
+        
     },
     
-    decodeAction: function(){
+    decodeAction: function(chunk, enc, callback){
         console.log('Do decode' + ' shift ' + this.shift);
-
-        return true;
+        
+        this.push(chunk);
+        callback();
+        
     },
     
     printUsageToConsole: function() {
@@ -154,7 +179,6 @@ const caesarChiper = {
     }
 }
 
-//console.log(process.argv);
 
 if( ! caesarChiper.init(process.argv) ){
     caesarChiper.printUsageToConsole();
