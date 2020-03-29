@@ -184,7 +184,6 @@ const caesarChiper = {
     },
     
     decodeAction: function(shift, charRanges){
-        console.log('Do decode' + ' shift ' + this.shift);
         
         return function (chunk, enc, callback){
             
@@ -197,6 +196,7 @@ const caesarChiper = {
                         break;
                     }
                 }
+                
                 if(foundRange){
                     let offset = (element - charRanges[foundRange][0] - shift ) % (charRanges[foundRange][1] - charRanges[foundRange][0]+1);
                     if(offset <0 ){
@@ -219,12 +219,12 @@ const caesarChiper = {
 }
 
 
-if( ! caesarChiper.init(process.argv) ){
+if( !caesarChiper.init(process.argv) ){
     caesarChiper.printUsageToConsole();
     process.exit(1);
 }
 
-if(! caesarChiper.actionDo()){
+if( !caesarChiper.actionDo()){
     caesarChiper.printUsageToConsole();
     process.exit(2);
 }
