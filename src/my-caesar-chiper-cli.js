@@ -13,6 +13,11 @@ const caesarChiper = {
         i: 'input',
         o: 'output'
     },
+
+    charRanges: {
+        r1: [65, 90],
+        r2: [97, 122]
+    },
     
     init: function(argv) {
 
@@ -135,10 +140,10 @@ const caesarChiper = {
         
         let ret = true;
         this.error = null;
-
+        
         pipeline(
             readStream,
-            through2(this[this.action]),
+            through2(this[this.action](this.shift, this.charRanges)),
             writeStream,
             (err)=>{
                 if(err){
@@ -151,26 +156,60 @@ const caesarChiper = {
                 }
             }
         )
-        console.log(ret);
-        return ret;//this[this.action]();
+        
+        return ret;
     },
     
-    encodeAction: function(chunk, enc, callback){
+    encodeAction: function(shift, charRanges){
         
-        console.log('Do encode' + ' shift ' + this.shift);
-        
-        this.push(chunk);
-        callback();
-
-        
+        return function (chunk, enc, callback){
+            
+            chunk.forEach((element,index,array)=>{
+                
+                let foundRange = null;
+                for(range in charRanges){
+                    if( (element >= charRanges[range][0]) && (element <= charRanges[range][1]) ){
+                        foundRange = range;
+                        break;
+                    }
+                }
+                if(foundRange){
+                    array[index] = (element - charRanges[foundRange][0] + shift ) % (charRanges[foundRange][1] - charRanges[foundRange][0]+1) + charRanges[foundRange][0];
+                }
+                
+            });
+            this.push(chunk);
+            callback();
+        }
     },
     
-    decodeAction: function(chunk, enc, callback){
+    decodeAction: function(shift, charRanges){
         console.log('Do decode' + ' shift ' + this.shift);
         
-        this.push(chunk);
-        callback();
-        
+        return function (chunk, enc, callback){
+            
+            chunk.forEach((element,index,array)=>{
+                
+                let foundRange = null;
+                for(range in charRanges){
+                    if( (element >= charRanges[range][0]) && (element <= charRanges[range][1]) ){
+                        foundRange = range;
+                        break;
+                    }
+                }
+                if(foundRange){
+                    let offset = (element - charRanges[foundRange][0] - shift ) % (charRanges[foundRange][1] - charRanges[foundRange][0]+1);
+                    if(offset <0 ){
+                        array[index] = charRanges[foundRange][1] + offset + 1;
+                    }else{
+                        array[index] = charRanges[foundRange][0] + offset;
+                    }
+                }
+                
+            });
+            this.push(chunk);
+            callback();
+        }
     },
     
     printUsageToConsole: function() {
