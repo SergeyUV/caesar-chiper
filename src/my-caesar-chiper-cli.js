@@ -121,7 +121,7 @@ const caesarChiper = {
                 console.error('Error: ' + this.outFilename + ' is not a file');
                 return undefined;
             }
-            writeStream = fs.createWriteStream(this.outFilename);        
+            writeStream = fs.createWriteStream(this.outFilename,{'flags': 'a'});        
         }
     return writeStream;
     },
