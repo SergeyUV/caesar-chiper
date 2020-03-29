@@ -155,8 +155,8 @@ const caesarChiper = {
                     return true;
                 }
             }
-        )
-        
+        );
+
         return ret;
     },
     
