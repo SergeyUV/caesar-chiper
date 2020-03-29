@@ -90,12 +90,12 @@ const caesarChiper = {
                 stat = fs.statSync(this.inFilename);
             }
             catch(err){
-                console.log(err.toString());
+                console.error(err.toString());
                 return undefined;
             }
             
             if(! stat.isFile()){
-                console.log('Error: ' + this.inFilename + ' is not a file');
+                console.error('Error: ' + this.inFilename + ' is not a file');
                 return undefined;
             }
             readStream = fs.createReadStream(this.inFilename);        
@@ -118,7 +118,7 @@ const caesarChiper = {
             }
             
             if( stat != undefined && stat.isDirectory()){
-                console.log('Error: ' + this.outFilename + ' is not a file');
+                console.error('Error: ' + this.outFilename + ' is not a file');
                 return undefined;
             }
             writeStream = fs.createWriteStream(this.outFilename);        
@@ -149,7 +149,7 @@ const caesarChiper = {
                 if(err){
                     this.error = err;
                     ret = false;
-                    console.log("Data transfer error");
+                    console.error("Data transfer error");
                     return false;
                 }else{
                     return true;
@@ -212,19 +212,18 @@ const caesarChiper = {
         }
     },
     
-    printUsageToConsole: function() {
+    printUsage: function() {
         const usageMessage = 'Usage: my-caesar-chiper-cli --action <encode|decode> --shift <number> --input <input_fie_name> --output <output_fie_name>';
-        console.log(usageMessage);
+        console.error(usageMessage);
     }
 }
 
 
 if( !caesarChiper.init(process.argv) ){
-    caesarChiper.printUsageToConsole();
+    caesarChiper.printUsage();
     process.exit(1);
 }
 
 if( !caesarChiper.actionDo()){
-    caesarChiper.printUsageToConsole();
     process.exit(2);
 }
